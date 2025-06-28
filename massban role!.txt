@@ -1,0 +1,29 @@
+const { Client, Intents } = require('discord.js');
+const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MEMBERS] });
+
+const TOKEN = 'YOUR BOT TOKEN';
+const ROLE_ID = 'ROLE_ID_TO_BAN';
+
+client.on('ready', () => {
+  console.log(`Logged in as ${client.user.tag}!`);
+});
+
+client.on('messageCreate', async (message) => {
+  if (message.content === '!banrole' && message.member.permissions.has('BAN_MEMBERS')) {
+    const role = message.guild.roles.cache.get(ROLE_ID);
+    if (!role) return message.reply('Role not found!');
+
+    const members = role.members;
+    for (const [id, member] of members) {
+      try {
+        await member.ban({ reason: 'Banned by role.' });
+        console.log(`Banned ${member.user.tag}`);
+      } catch (err) {
+        console.error(`Failed to ban ${member.user.tag}: `, err);
+      }
+    }
+    message.reply(`Banned everyone with the role: ${role.name}`);
+  }
+});
+
+client.login("TOKEN");
